@@ -1,0 +1,42 @@
+{
+  "widget": {
+    "name": "widget.name",
+    "description": "widget.description",
+    "short_description": "widget.short_description",
+    "version": "3.0.0",
+    "interface_version": 2,
+    "init_once": false,
+    "locale": ["ru"],
+    "installation": true,
+    "support": {
+      "link": "https://github.com/Lumpen43/widget-antidupl-v2",
+      "email": "epifan1337@mail.ru"
+    }
+  },
+  "locations": ["settings", "ccard-1"],
+  "settings": {
+    "api_token": {
+      "name": "settings.api_token",
+      "type": "text",
+      "required": false
+    },
+    "compare_fields": {
+      "name": "settings.compare_fields",
+      "type": "custom",
+      "required": false
+    },
+    "custom_field_code": {
+      "name": "settings.custom_field_code",
+      "type": "text",
+      "required": false,
+      "default": "TELEGRAM_USERNAME_ID"
+    }
+  },
+  "tour": {
+    "is_tour": true,
+    "tour_images": {
+      "ru": ["/images/tour_1_ru.png", "/images/tour_2_ru.png", "/images/tour_3_ru.png"]
+    },
+    "tour_description": "widget.tour_description"
+  }
+}

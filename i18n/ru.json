@@ -1,0 +1,40 @@
+{
+  "widget": {
+    "name": "Антидубль v3",
+    "description": "Поиск и объединение дубликатов контактов в amoCRM. Сравнение по телефону, email, имени и любым кастомным полям.",
+    "short_description": "Поиск и склейка дублей",
+    "tour_description": "Настройте поля для сравнения и сканируйте контакты на дубликаты. Поддерживает автоматическое слияние через API v4."
+  },
+  "settings": {
+    "api_token": "Долгосрочный токен",
+    "compare_fields": "Поля для сравнения",
+    "custom_field_code": "Код доп. поля (Telegram ID)",
+    "api_token_hint": "Скопируйте из Настройки → API → Долгосрочный токен",
+    "compare_fields_hint": "Выберите поля, по которым искать дубликаты",
+    "compare_fields_phone": "Телефон",
+    "compare_fields_email": "Email",
+    "compare_fields_name": "Имя",
+    "compare_fields_custom": "Кастомные поля:",
+    "save_btn": "Сохранить",
+    "saving": "Сохранение..."
+  },
+  "interface": {
+    "scan_button": "Найти дубликаты",
+    "scanning": "Сканирование...",
+    "found_groups": "Найдено групп дублей:",
+    "master_label": "главный",
+    "merge_btn": "Слить",
+    "close_btn": "Закрыть",
+    "no_duplicates": "Дубликаты не найдены",
+    "error_occurred": "Произошла ошибка",
+    "merge_success": "Слияние выполнено",
+    "no_token": "Введите долгосрочный токен в настройках",
+    "no_fields": "Выберите поля для сравнения в настройках",
+    "merge_api_success": "Готово",
+    "token_title": "Настройки виджета",
+    "selected_fields": "Выбрано полей:"
+  },
+  "advanced": {
+    "title": "Антидубль — настройки"
+  }
+}

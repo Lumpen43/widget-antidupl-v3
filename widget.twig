@@ -1,0 +1,23 @@
+<div class="adu3-settings">
+  <div class="adu3-fields-section">
+    <h3>{{ lang.settings.compare_fields }}</h3>
+    <p class="adu3-hint">{{ lang.settings.compare_fields_hint }}</p>
+    <div id="adu3-fields-container">
+      <!-- Системный multiselect будет вставлен сюда через JS -->
+    </div>
+  </div>
+
+  <div class="adu3-custom-section" id="adu3-custom-fields-section" style="display:none;">
+    <h4>{{ lang.settings.compare_fields_custom }}</h4>
+    <div id="adu3-custom-fields-list">
+      <!-- Кастомные поля будут загружены через API -->
+    </div>
+  </div>
+
+  <div class="adu3-footer">
+    <button class="adu3-save-btn am-button am-button--success" id="adu3-save-fields">
+      {{ lang.settings.save_btn }}
+    </button>
+    <span class="adu3-status"></span>
+  </div>
+</div>
