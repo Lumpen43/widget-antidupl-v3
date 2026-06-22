@@ -3,13 +3,13 @@
     "name": "widget.name",
     "description": "widget.description",
     "short_description": "widget.short_description",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "interface_version": 2,
     "init_once": false,
     "locale": ["ru"],
     "installation": true,
     "support": {
-      "link": "https://github.com/Lumpen43/widget-antidupl-v2",
+      "link": "https://github.com/Lumpen43/widget-antidupl-v3",
       "email": "epifan1337@mail.ru"
     }
   },
