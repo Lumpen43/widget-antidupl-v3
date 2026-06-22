@@ -4,10 +4,6 @@ define(["jquery"], function ($) {
       system = self.system(),
       langs = self.langs;
 
-    // =============================================================
-    // Хранилище полей контакта
-    // =============================================================
-
     self.contactFields = [];
     self.customFieldsLoaded = false;
 
@@ -74,7 +70,7 @@ define(["jquery"], function ($) {
     }
 
     // =============================================================
-    // Загрузка кастомных полей контакта
+    // Загрузка полей
     // =============================================================
 
     function loadCustomFields() {
@@ -204,7 +200,7 @@ define(["jquery"], function ($) {
     }
 
     // =============================================================
-    // UI в карточке контакта
+    // Карточка контакта
     // =============================================================
 
     function initCardUI() {
@@ -214,18 +210,16 @@ define(["jquery"], function ($) {
       var selectedFields = [];
       try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
 
-      console.log("[Антидубль] initCardUI: wCode=", wCode, "token=", token ? "есть" : "нет", "fields=", selectedFields.length);
+      console.log("[Антидубль] card: wCode=", wCode, "token=", token ? "да" : "нет", "fields=", selectedFields.length);
 
       var html = '<div style="padding:12px 15px;font-size:13px;line-height:1.5;">';
       html += '<div style="font-weight:600;font-size:14px;margin-bottom:10px;color:#333;">' + langs.interface.scan_button + '</div>';
-
       if (!token) {
         html += '<p style="color:#888;font-size:12px;">' + langs.interface.no_token + '</p>';
       } else if (!selectedFields.length) {
         html += '<p style="color:#888;font-size:12px;">' + langs.interface.no_fields + '</p>';
       } else {
-        html += '<div style="margin-bottom:8px;font-size:11px;color:#666;">Поля: ' + selectedFields.length + '</div>';
-        html += '<button class="adu-scan" style="width:100%;padding:8px;font-size:13px;cursor:pointer;border:none;border-radius:4px;background:#4CAF50;color:#fff;">' +
+        html += '<button class="adu-scan" style="width:100%;padding:9px;font-size:13px;cursor:pointer;border:none;border-radius:4px;background:#4CAF50;color:#fff;">' +
           langs.interface.scan_button + '</button>';
       }
       html += '</div>';
@@ -233,7 +227,7 @@ define(["jquery"], function ($) {
       var $body = $();
       if (wCode) {
         $body = $(".card-widgets__widget-" + wCode + " .card-widgets__widget__body");
-        console.log("[Антидубль] поиск по wCode:", $body.length);
+        console.log("[Антидубль] wCode поиск:", $body.length);
       }
       if (!$body.length) {
         $body = $(".card-widgets__widget__body").first();
@@ -245,7 +239,7 @@ define(["jquery"], function ($) {
       }
       if ($body.length) {
         $body.html(html);
-        console.log("[Антидубль] HTML вставлен");
+        console.log("[Антидубль] HTML вставлен в", $body.length, "элементов");
       } else {
         console.error("[Антидубль] КОНТЕЙНЕР НЕ НАЙДЕН");
       }
@@ -307,72 +301,81 @@ define(["jquery"], function ($) {
     }
 
     // =============================================================
-    // НАСТРОЙКИ — custom-поле по документации
+    // СТРАНИЦА НАСТРОЕК (advanced_settings)
+    // Полный контроль над страницей по документации
     // =============================================================
 
-    function initSettings($settings_body) {
-      var wCode = self.params.widget_code;
-      console.log("[Антидубль] settings: wCode=", wCode);
+    function initAdvancedSettings() {
+      var settings = self.get_settings();
+      var selectedFields = [];
+      try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
 
-      // По документации:
-      //   hidden input ID: <код_виджета>_custom  (name="compare_fields")
-      //   div content ID: <код_виджета>_custom_content
-      var $content = $settings_body.find("#" + wCode + "_custom_content");
-      var $hidden = $settings_body.find('input[name="compare_fields"]');
+      var html =
+        '<div class="adu-adv-settings" style="max-width:600px;margin:20px auto;padding:24px;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">' +
+        '<h2 style="margin:0 0 20px;font-size:18px;color:#333;">' + langs.advanced.title + '</h2>' +
 
-      console.log("[Антидубль] custom content найден:", $content.length, " hidden:", $hidden.length);
+        // Токен
+        '<div style="margin-bottom:16px;">' +
+        '<label style="display:block;font-weight:600;margin-bottom:4px;font-size:13px;">' + langs.settings.api_token + '</label>' +
+        '<input type="text" id="adu-token" value="' + htmlEscape(settings.api_token || "") + '" ' +
+        'style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:13px;box-sizing:border-box;">' +
+        '</div>' +
 
-      if (!$content.length) {
-        // fallback — ищем в модалке
-        $content = $settings_body.find(".widget_settings_block");
-        console.log("[Антидубль] fallback widget_settings_block:", $content.length);
-      }
+        // Поля для сравнения
+        '<div style="margin-bottom:16px;">' +
+        '<label style="display:block;font-weight:600;margin-bottom:8px;font-size:13px;">' + langs.settings.compare_fields + '</label>' +
+        '<div id="adu-fields-container" style="border:1px solid #e0e0e0;border-radius:6px;padding:12px;max-height:300px;overflow-y:auto;">' +
+        '<p style="color:#888;font-size:12px;">Загрузка полей...</p>' +
+        '</div></div>' +
 
-      // Загружаем поля
+        // Кнопка сохранения
+        '<button id="adu-save-btn" style="padding:10px 24px;background:#4CAF50;color:#fff;border:none;border-radius:4px;font-size:14px;cursor:pointer;">' +
+        langs.settings.save_btn + '</button>' +
+        '<span id="adu-status" style="margin-left:12px;font-size:13px;"></span>' +
+        '</div>';
+
+      // По документации: страница полностью контролируется виджетом
+      $("#list_page_holder").html(html);
+
+      // Загружаем поля и рендерим чекбоксы
       loadCustomFields().then(function (fields) {
-        renderFieldCheckboxes($content, $hidden, fields);
+        renderAdvCheckboxes(fields, selectedFields);
+      });
+
+      // Кнопка "Сохранить"
+      $("#adu-save-btn").on("click", function () {
+        var token = $("#adu-token").val().trim();
+        var checked = [];
+        $("#adu-fields-container .adu-field-cb:checked").each(function () {
+          checked.push($(this).val());
+        });
+        // Сохраняем через set_settings
+        self.set_settings({
+          api_token: token,
+          compare_fields: JSON.stringify(checked)
+        });
+        $("#adu-status").text("✅ Сохранено").fadeOut(2000, function () { $(this).show().text(""); });
       });
     }
 
-    function renderFieldCheckboxes($container, $hidden, fields) {
-      var settings = self.get_settings();
-      var selected = [];
-      try { selected = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
-
-      var html = '<div style="margin:12px 0;padding:12px;border:1px solid #e0e0e0;border-radius:6px;background:#fafafa;">' +
-        '<label style="display:block;font-weight:600;margin-bottom:8px;font-size:13px;">' +
-        langs.settings.compare_fields + '</label>';
-
+    function renderAdvCheckboxes(fields, selected) {
+      var html = "";
       fields.forEach(function (f) {
         var checked = selected.indexOf(f.id) !== -1;
-        html += '<label style="display:block;margin:3px 0;font-size:13px;cursor:pointer;">' +
+        html += '<label style="display:block;margin:3px 0;font-size:13px;cursor:pointer;padding:2px 4px;border-radius:3px;">' +
           '<input type="checkbox" class="adu-field-cb" value="' + f.id + '" ' +
           (checked ? 'checked' : '') + ' style="margin-right:6px;"> ' +
-          f.name + (f.type === "custom" ? '' : '') +
+          f.name +
           '</label>';
       });
-      html += '</div>';
-
-      // Вставляем HTML в контейнер custom-поля
-      $container.html(html);
-
-      // По документации: при изменении пишем JSON в hidden и триггерим change
-      $container.on("change", ".adu-field-cb", function () {
-        var vals = [];
-        $container.find(".adu-field-cb:checked").each(function () { vals.push($(this).val()); });
-        var json = JSON.stringify(vals);
-        if ($hidden.length) {
-          $hidden.val(json).trigger("change");
-          console.log("[Антидубль] saved fields:", json);
-        }
-      });
-
-      // Сразу сохраняем начальное состояние
-      var initial = [];
-      $container.find(".adu-field-cb:checked").each(function () { initial.push($(this).val()); });
-      if ($hidden.length && initial.length) {
-        $hidden.val(JSON.stringify(initial));
+      if (!fields.length) {
+        html = '<p style="color:#888;font-size:12px;">Нет доступных полей. Сначала введите токен.</p>';
       }
+      $("#adu-fields-container").html(html);
+    }
+
+    function htmlEscape(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
     // =============================================================
@@ -392,9 +395,9 @@ define(["jquery"], function ($) {
         return true;
       },
       bind_actions: function () { return true; },
-      settings: function ($settings_body) {
-        initSettings($settings_body);
-        return true;
+      settings: function () { return true; },
+      advancedSettings: function () {
+        initAdvancedSettings();
       },
       onSave: function () { return true; },
       destroy: function () {},

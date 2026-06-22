@@ -3,7 +3,7 @@
     "name": "widget.name",
     "description": "widget.description",
     "short_description": "widget.short_description",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "interface_version": 2,
     "init_once": false,
     "locale": ["ru"],
@@ -13,24 +13,9 @@
       "email": "epifan1337@mail.ru"
     }
   },
-  "locations": ["settings", "ccard-1"],
-  "settings": {
-    "api_token": {
-      "name": "settings.api_token",
-      "type": "text",
-      "required": false
-    },
-    "compare_fields": {
-      "name": "settings.compare_fields",
-      "type": "custom",
-      "required": false
-    },
-    "custom_field_code": {
-      "name": "settings.custom_field_code",
-      "type": "text",
-      "required": false,
-      "default": "TELEGRAM_USERNAME_ID"
-    }
+  "locations": ["ccard-1", "advanced_settings"],
+  "advanced": {
+    "title": "advanced.title"
   },
   "tour": {
     "is_tour": true,
