@@ -233,8 +233,11 @@ define(["jquery"], function ($) {
     function initCardUI() {
       var token = getToken();
       var settings = self.get_settings();
+      var wCode = self.params.widget_code;
       var selectedFields = [];
       try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
+
+      console.log("[Антидубль v3] initCardUI: wCode=", wCode, "token=", token ? "есть" : "нет", "fields=", selectedFields.length);
 
       var html = '<div style="padding:12px 15px;font-size:13px;line-height:1.5;">';
       html += '<div style="font-weight:600;font-size:14px;margin-bottom:10px;color:#333;">' + langs.interface.scan_button + '</div>';
@@ -251,12 +254,26 @@ define(["jquery"], function ($) {
       }
       html += '</div>';
 
-      // Используем render_template по документации
-      self.render_template({
-        caption: { class_name: "adu3-card" },
-        body: html,
-        render: ""
-      });
+      // Поиск контейнера виджета — прямой DOM
+      var $body = $();
+      if (wCode) {
+        $body = $(".card-widgets__widget-" + wCode + " .card-widgets__widget__body");
+        console.log("[Антидубль v3] поиск по wCode:", $body.length);
+      }
+      if (!$body.length) {
+        $body = $(".card-widgets__widget__body").first();
+        console.log("[Антидубль v3] fallback body:", $body.length);
+      }
+      if (!$body.length) {
+        $body = $("body");
+        console.log("[Антидубль v3] fallback body itself:", $body.length, "in iframe:", window !== window.top);
+      }
+      if ($body.length) {
+        $body.html(html);
+        console.log("[Антидубль v3] HTML вставлен");
+      } else {
+        console.error("[Антидубль v3] КОНТЕЙНЕР НЕ НАЙДЕН");
+      }
 
       $(".adu3-scan").off().on("click", function () { doScan($(this)); });
     }
