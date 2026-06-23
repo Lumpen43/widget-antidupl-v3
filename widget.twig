@@ -1,23 +1,8 @@
-<div class="adu3-settings">
-  <div class="adu3-fields-section">
-    <h3>{{ lang.settings.compare_fields }}</h3>
-    <p class="adu3-hint">{{ lang.settings.compare_fields_hint }}</p>
-    <div id="adu3-fields-container">
-      <!-- Системный multiselect будет вставлен сюда через JS -->
-    </div>
+<div class="adu-card" style="padding:12px 15px;font-size:13px;line-height:1.5;">
+  <div class="adu-card-header" style="font-weight:600;font-size:14px;margin-bottom:10px;color:#333;">
+    {% if lang.interface.scan_button is defined %}{{ lang.interface.scan_button }}{% else %}Антидубль{% endif %}
   </div>
-
-  <div class="adu3-custom-section" id="adu3-custom-fields-section" style="display:none;">
-    <h4>{{ lang.settings.compare_fields_custom }}</h4>
-    <div id="adu3-custom-fields-list">
-      <!-- Кастомные поля будут загружены через API -->
-    </div>
-  </div>
-
-  <div class="adu3-footer">
-    <button class="adu3-save-btn am-button am-button--success" id="adu3-save-fields">
-      {{ lang.settings.save_btn }}
-    </button>
-    <span class="adu3-status"></span>
+  <div class="adu-card-body">
+    <p style="color:#888;font-size:12px;">Загрузка...</p>
   </div>
 </div>

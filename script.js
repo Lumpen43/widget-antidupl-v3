@@ -224,7 +224,6 @@ define(["jquery"], function ($) {
         var lsKey = "adu3_" + (self.params && self.params.widget_code ? self.params.widget_code : "default");
         var settings = self.get_settings();
         console.log("[Антидубль] card get_settings:", JSON.stringify(settings));
-        // Подтягиваем из localStorage
         try {
           var lsData = JSON.parse(localStorage.getItem(lsKey) || "{}");
           if (lsData.api_token && !settings.api_token) settings.api_token = lsData.api_token;
@@ -232,42 +231,48 @@ define(["jquery"], function ($) {
         } catch(e) {}
         var token = (settings.api_token || "").trim();
         var wCode = self.params.widget_code;
+        console.log("[Антидубль] widget_code:", wCode);
         var selectedFields = [];
         try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
-
         console.log("[Антидубль] card: wCode=", wCode, "token=", token ? "да" : "нет", "fields=", selectedFields.length);
 
-        var html = '<div style="padding:12px 15px;font-size:13px;line-height:1.5;">';
-        html += '<div style="font-weight:600;font-size:14px;margin-bottom:10px;color:#333;">' + L2.scan_button + '</div>';
-      if (!token) {
-        html += '<p style="color:#888;font-size:12px;">' + L2.no_token + '</p>';
-      } else if (!selectedFields.length) {
-        html += '<p style="color:#888;font-size:12px;">' + L2.no_fields + '</p>';
-      } else {
-        html += '<button class="adu-scan" style="width:100%;padding:9px;font-size:13px;cursor:pointer;border:none;border-radius:4px;background:#4CAF50;color:#fff;">' +
-          L2.scan_button + '</button>';
-      }
-      html += '</div>';
-
-      // Рендерим в self.$root - родной контейнер виджета в карточке
-      var $root = (self.$root && self.$root.length) ? self.$root : 
-                  (self.element ? $(self.element) : $());
-      if (!$root || !$root.length) {
-        // Fallback на CSS селекторы
-        $root = $(".card-widgets__widget-" + wCode + " .card-widgets__widget__body").first();
-        if (!$root || !$root.length) {
-          $root = $(".card-widgets__widget__body").first();
+        // Ищем .adu-card-body внутри нашего виджета в карточке
+        // amoCRM сам рендерит widget.twig в контейнер виджета
+        var $body = $();
+        // Сначала по widget_code
+        if (wCode) {
+          $body = $(".card-widgets__widget-" + wCode + " .adu-card-body, .card-widgets__widget-" + wCode + " .adu-card-body").first();
         }
-      }
-      console.log("[Антидубль] card container:", $root && $root.length ? ($root[0].id || $root[0].className || $root[0].tagName) : "NONE");
-      if ($root && $root.length) {
-        $root.html(html);
-      } else {
-        $("body").html(html);
-        console.warn("[Антидубль] fallback to body");
-      }
+        // Если не нашли - ищем любой .adu-card-body внутри виджетов
+        if (!$body || !$body.length) {
+          $body = $(".card-widgets__widget__body .adu-card-body").first();
+        }
+        // Последний шанс - .adu-card-body вообще где угодно
+        if (!$body || !$body.length) {
+          $body = $(".adu-card-body").first();
+        }
+        if (!$body || !$body.length) {
+          console.error("[Антидубль] .adu-card-body не найден в DOM");
+          return;
+        }
+        console.log("[Антидубль] .adu-card-body найден");
 
-      $(".adu-scan").off().on("click", function () { doScan($(this)); });
+        // Обновляем содержимое тела карточки (НЕ заменяем весь контейнер)
+        var html = "";
+        if (!token) {
+          html = '<p style="color:#888;font-size:12px;">' + L2.no_token + '</p>';
+        } else if (!selectedFields.length) {
+          html = '<p style="color:#888;font-size:12px;">' + L2.no_fields + '</p>';
+        } else {
+          html = '<button class="adu-scan" style="width:100%;padding:9px;font-size:13px;cursor:pointer;border:none;border-radius:4px;background:#4CAF50;color:#fff;">' +
+            L2.scan_button + '</button>';
+        }
+        $body.html(html);
+
+        // Вешаем обработчик на кнопку сканирования
+        if (token && selectedFields.length) {
+          $(".adu-scan").off().on("click", function () { doScan($(this)); });
+        }
     } catch(e) { console.error("[Антидубль] card UI error:", e); }
     }
 
