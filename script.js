@@ -327,6 +327,14 @@ define(["jquery"], function ($) {
       console.log("[Антидубль] advancedSettings called");
       try {
         var settings = self.get_settings();
+        console.log("[Антидубль] get_settings:", JSON.stringify(settings));
+        // Backup из localStorage
+        var lsKey = "adu3_" + (self.params && self.params.widget_code ? self.params.widget_code : "default");
+        try {
+          var lsData = JSON.parse(localStorage.getItem(lsKey) || "{}");
+          if (lsData.api_token && !settings.api_token) settings.api_token = lsData.api_token;
+          if (lsData.compare_fields && !settings.compare_fields) settings.compare_fields = lsData.compare_fields;
+        } catch(e) {}
         var selectedFields = [];
         try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
       // Fallback для langs (на странице advanced_settings может не быть)
@@ -384,11 +392,18 @@ define(["jquery"], function ($) {
         $("#adu-fields-container .adu-field-cb:checked").each(function () {
           checked.push($(this).val());
         });
-        // Сохраняем через set_settings
-        self.set_settings({
+        var saveData = {
           api_token: token,
           compare_fields: JSON.stringify(checked)
-        });
+        };
+        // Сохраняем в localStorage (надежно)
+        try {
+          var lsKey = "adu3_" + (self.params && self.params.widget_code ? self.params.widget_code : "default");
+          localStorage.setItem(lsKey, JSON.stringify(saveData));
+        } catch(e) { console.error("[Антидубль] localStorage error:", e); }
+        // Сохраняем через set_settings
+        self.set_settings(saveData);
+        console.log("[Антидубль] saved:", JSON.stringify(saveData));
         $("#adu-status").text("✅ Сохранено").fadeOut(2000, function () { $(this).show().text(""); });
       });
     } catch(e) { console.error("[Антидубль] advanced settings error:", e); }
