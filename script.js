@@ -221,8 +221,16 @@ define(["jquery"], function ($) {
           merge_api_success: (Ln2.interface && Ln2.interface.merge_api_success) || "Готово",
           merge_success: (Ln2.interface && Ln2.interface.merge_success) || "Слияние выполнено"
         };
-        var token = getToken();
+        var lsKey = "adu3_" + (self.params && self.params.widget_code ? self.params.widget_code : "default");
         var settings = self.get_settings();
+        console.log("[Антидубль] card get_settings:", JSON.stringify(settings));
+        // Подтягиваем из localStorage
+        try {
+          var lsData = JSON.parse(localStorage.getItem(lsKey) || "{}");
+          if (lsData.api_token && !settings.api_token) settings.api_token = lsData.api_token;
+          if (lsData.compare_fields && !settings.compare_fields) settings.compare_fields = lsData.compare_fields;
+        } catch(e) {}
+        var token = (settings.api_token || "").trim();
         var wCode = self.params.widget_code;
         var selectedFields = [];
         try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
@@ -241,24 +249,22 @@ define(["jquery"], function ($) {
       }
       html += '</div>';
 
-      var $body = $();
-      if (wCode) {
-        $body = $(".card-widgets__widget-" + wCode + " .card-widgets__widget__body");
-        console.log("[Антидубль] wCode поиск:", $body.length);
+      // Рендерим в self.$root - родной контейнер виджета в карточке
+      var $root = (self.$root && self.$root.length) ? self.$root : 
+                  (self.element ? $(self.element) : $());
+      if (!$root || !$root.length) {
+        // Fallback на CSS селекторы
+        $root = $(".card-widgets__widget-" + wCode + " .card-widgets__widget__body").first();
+        if (!$root || !$root.length) {
+          $root = $(".card-widgets__widget__body").first();
+        }
       }
-      if (!$body.length) {
-        $body = $(".card-widgets__widget__body").first();
-        console.log("[Антидубль] fallback body:", $body.length);
-      }
-      if (!$body.length) {
-        $body = $("body");
-        console.log("[Антидубль] fallback body сам:", $body.length, "iframe:", window !== window.top);
-      }
-      if ($body.length) {
-        $body.html(html);
-        console.log("[Антидубль] HTML вставлен в", $body.length, "элементов");
+      console.log("[Антидубль] card container:", $root && $root.length ? ($root[0].id || $root[0].className || $root[0].tagName) : "NONE");
+      if ($root && $root.length) {
+        $root.html(html);
       } else {
-        console.error("[Антидубль] КОНТЕЙНЕР НЕ НАЙДЕН");
+        $("body").html(html);
+        console.warn("[Антидубль] fallback to body");
       }
 
       $(".adu-scan").off().on("click", function () { doScan($(this)); });
