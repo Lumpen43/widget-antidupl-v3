@@ -311,28 +311,38 @@ define(["jquery"], function ($) {
         var settings = self.get_settings();
         var selectedFields = [];
         try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
+      // Fallback для langs (на странице advanced_settings может не быть)
+      var Ln = (langs && typeof langs === "object") ? langs : {};
+      var L = {
+        advanced: { title: (Ln.advanced && Ln.advanced.title) || "Антидубль" },
+        settings: {
+          api_token: (Ln.settings && Ln.settings.api_token) || "Долгосрочный токен",
+          compare_fields: (Ln.settings && Ln.settings.compare_fields) || "Поля для сравнения",
+          save_btn: (Ln.settings && Ln.settings.save_btn) || "Сохранить"
+        }
+      };
 
       var html =
         '<div class="adu-adv-settings" style="max-width:600px;margin:20px auto;padding:24px;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">' +
-        '<h2 style="margin:0 0 20px;font-size:18px;color:#333;">' + langs.advanced.title + '</h2>' +
+        '<h2 style="margin:0 0 20px;font-size:18px;color:#333;">' + L.advanced.title + '</h2>' +
 
         // Токен
         '<div style="margin-bottom:16px;">' +
-        '<label style="display:block;font-weight:600;margin-bottom:4px;font-size:13px;">' + langs.settings.api_token + '</label>' +
+        '<label style="display:block;font-weight:600;margin-bottom:4px;font-size:13px;">' + L.settings.api_token + '</label>' +
         '<input type="text" id="adu-token" value="' + htmlEscape(settings.api_token || "") + '" ' +
         'style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:13px;box-sizing:border-box;">' +
         '</div>' +
 
         // Поля для сравнения
         '<div style="margin-bottom:16px;">' +
-        '<label style="display:block;font-weight:600;margin-bottom:8px;font-size:13px;">' + langs.settings.compare_fields + '</label>' +
+        '<label style="display:block;font-weight:600;margin-bottom:8px;font-size:13px;">' + L.settings.compare_fields + '</label>' +
         '<div id="adu-fields-container" style="border:1px solid #e0e0e0;border-radius:6px;padding:12px;max-height:300px;overflow-y:auto;">' +
         '<p style="color:#888;font-size:12px;">Загрузка полей...</p>' +
         '</div></div>' +
 
         // Кнопка сохранения
         '<button id="adu-save-btn" style="padding:10px 24px;background:#4CAF50;color:#fff;border:none;border-radius:4px;font-size:14px;cursor:pointer;">' +
-        langs.settings.save_btn + '</button>' +
+        L.settings.save_btn + '</button>' +
         '<span id="adu-status" style="margin-left:12px;font-size:13px;"></span>' +
         '</div>';
 
