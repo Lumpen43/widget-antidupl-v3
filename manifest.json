@@ -13,7 +13,7 @@
       "email": "epifan1337@mail.ru"
     }
   },
-  "locations": ["ccard-1", "advanced_settings"],
+  "locations": ["ccard-1", "settings", "advanced_settings"],
   "settings": {
     "api_token": { "type": "text", "name": "settings.api_token", "required": false },
     "compare_fields": { "type": "text", "name": "settings.compare_fields", "required": false }
