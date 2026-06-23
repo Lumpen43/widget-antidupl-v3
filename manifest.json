@@ -14,6 +14,10 @@
     }
   },
   "locations": ["ccard-1", "advanced_settings"],
+  "settings": {
+    "api_token": { "type": "text", "name": "settings.api_token", "required": false },
+    "compare_fields": { "type": "text", "name": "settings.compare_fields", "required": false }
+  },
   "advanced": {
     "title": "advanced.title"
   },
