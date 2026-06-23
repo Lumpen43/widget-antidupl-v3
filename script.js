@@ -306,9 +306,11 @@ define(["jquery"], function ($) {
     // =============================================================
 
     function initAdvancedSettings() {
-      var settings = self.get_settings();
-      var selectedFields = [];
-      try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
+      console.log("[Антидубль] advancedSettings called");
+      try {
+        var settings = self.get_settings();
+        var selectedFields = [];
+        try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
 
       var html =
         '<div class="adu-adv-settings" style="max-width:600px;margin:20px auto;padding:24px;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.1);">' +
@@ -335,7 +337,12 @@ define(["jquery"], function ($) {
         '</div>';
 
       // По документации: страница полностью контролируется виджетом
-      $("#list_page_holder").html(html);
+      // Ищем контейнер с fallback
+      var $container = $("#list_page_holder").length ? $("#list_page_holder") : $("body");
+      if ($container.is("body") || !$container.length) {
+        $container = $(".content-container, .content-wrapper, .page-content, #content, body").first();
+      }
+      $container.html(html).show();
 
       // Загружаем поля и рендерим чекбоксы
       loadCustomFields().then(function (fields) {
@@ -356,6 +363,7 @@ define(["jquery"], function ($) {
         });
         $("#adu-status").text("✅ Сохранено").fadeOut(2000, function () { $(this).show().text(""); });
       });
+    } catch(e) { console.error("[Антидубль] advanced settings error:", e); }
     }
 
     function renderAdvCheckboxes(fields, selected) {
