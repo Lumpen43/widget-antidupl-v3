@@ -204,23 +204,40 @@ define(["jquery"], function ($) {
     // =============================================================
 
     function initCardUI() {
-      var token = getToken();
-      var settings = self.get_settings();
-      var wCode = self.params.widget_code;
-      var selectedFields = [];
-      try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
+      console.log("[Антидубль] initCardUI called");
+      try {
+        var Ln2 = (langs && typeof langs === "object") ? langs : {};
+        var L2 = {
+          scan_button: (Ln2.interface && Ln2.interface.scan_button) || "Найти дубликаты",
+          no_token: (Ln2.interface && Ln2.interface.no_token) || "Сначала настройте виджет",
+          no_fields: (Ln2.interface && Ln2.interface.no_fields) || "Выберите поля в настройках",
+          scanning: (Ln2.interface && Ln2.interface.scanning) || "Сканирование...",
+          no_duplicates: (Ln2.interface && Ln2.interface.no_duplicates) || "Дубликаты не найдены",
+          error_occurred: (Ln2.interface && Ln2.interface.error_occurred) || "Ошибка",
+          found_groups: (Ln2.interface && Ln2.interface.found_groups) || "Найдено групп:",
+          master_label: (Ln2.interface && Ln2.interface.master_label) || "главный",
+          merge_btn: (Ln2.interface && Ln2.interface.merge_btn) || "Слить",
+          close_btn: (Ln2.interface && Ln2.interface.close_btn) || "Закрыть",
+          merge_api_success: (Ln2.interface && Ln2.interface.merge_api_success) || "Готово",
+          merge_success: (Ln2.interface && Ln2.interface.merge_success) || "Слияние выполнено"
+        };
+        var token = getToken();
+        var settings = self.get_settings();
+        var wCode = self.params.widget_code;
+        var selectedFields = [];
+        try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
 
-      console.log("[Антидубль] card: wCode=", wCode, "token=", token ? "да" : "нет", "fields=", selectedFields.length);
+        console.log("[Антидубль] card: wCode=", wCode, "token=", token ? "да" : "нет", "fields=", selectedFields.length);
 
-      var html = '<div style="padding:12px 15px;font-size:13px;line-height:1.5;">';
-      html += '<div style="font-weight:600;font-size:14px;margin-bottom:10px;color:#333;">' + langs.interface.scan_button + '</div>';
+        var html = '<div style="padding:12px 15px;font-size:13px;line-height:1.5;">';
+        html += '<div style="font-weight:600;font-size:14px;margin-bottom:10px;color:#333;">' + L2.scan_button + '</div>';
       if (!token) {
-        html += '<p style="color:#888;font-size:12px;">' + langs.interface.no_token + '</p>';
+        html += '<p style="color:#888;font-size:12px;">' + L2.no_token + '</p>';
       } else if (!selectedFields.length) {
-        html += '<p style="color:#888;font-size:12px;">' + langs.interface.no_fields + '</p>';
+        html += '<p style="color:#888;font-size:12px;">' + L2.no_fields + '</p>';
       } else {
         html += '<button class="adu-scan" style="width:100%;padding:9px;font-size:13px;cursor:pointer;border:none;border-radius:4px;background:#4CAF50;color:#fff;">' +
-          langs.interface.scan_button + '</button>';
+          L2.scan_button + '</button>';
       }
       html += '</div>';
 
@@ -245,22 +262,23 @@ define(["jquery"], function ($) {
       }
 
       $(".adu-scan").off().on("click", function () { doScan($(this)); });
+    } catch(e) { console.error("[Антидубль] card UI error:", e); }
     }
 
     function doScan($btn) {
       var settings = self.get_settings();
       var selectedFields = [];
       try { selectedFields = JSON.parse(settings.compare_fields || "[]"); } catch (e) {}
-      if (!selectedFields.length) { notify(langs.interface.no_fields, true); return; }
-      $btn.prop("disabled", true).text(langs.interface.scanning);
+      if (!selectedFields.length) { notify(L2.no_fields, true); return; }
+      $btn.prop("disabled", true).text(L2.scanning);
       fetchAll("contacts").then(function (contacts) {
-        $btn.prop("disabled", false).text(langs.interface.scan_button);
+        $btn.prop("disabled", false).text(L2.scan_button);
         var groups = findDuplicates(contacts, selectedFields);
-        if (!groups.length) { notify(langs.interface.no_duplicates, false); return; }
+        if (!groups.length) { notify(L2.no_duplicates, false); return; }
         showMergeModal(groups);
       }).catch(function (err) {
-        $btn.prop("disabled", false).text(langs.interface.scan_button);
-        notify(langs.interface.error_occurred + ": " + (err.message || ""), true);
+        $btn.prop("disabled", false).text(L2.scan_button);
+        notify(L2.error_occurred + ": " + (err.message || ""), true);
       });
     }
 
@@ -268,34 +286,34 @@ define(["jquery"], function ($) {
       var html =
         '<div class="adu-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99998;"></div>' +
         '<div class="adu-modal" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.2);z-index:99999;width:520px;max-height:80vh;overflow-y:auto;padding:24px;">' +
-        '<h3 style="margin:0 0 16px;font-size:16px;">' + langs.interface.found_groups + ' ' + groups.length + '</h3>';
+        '<h3 style="margin:0 0 16px;font-size:16px;">' + L2.found_groups + ' ' + groups.length + '</h3>';
       groups.forEach(function (g, idx) {
         html += '<div style="border:1px solid #e0e0e0;border-radius:6px;padding:12px;margin-bottom:10px;background:#fafafa;">' +
           '<div style="font-weight:600;margin-bottom:8px;">Группа ' + (idx + 1) + ' (' + g.ids.length + ' конт.)</div>';
         g.contacts.forEach(function (c) {
           html += '<div style="padding:3px 8px;margin:2px 0;font-size:12px;border-left:3px solid ' +
             (c.id === g.master_id ? '#4CAF50;font-weight:bold;background:#e8f5e9' : '#ccc;background:#fff') +
-            '">' + (c.name || "—") + ' (ID:' + c.id + ')' + (c.id === g.master_id ? ' ← ' + langs.interface.master_label : '') + '</div>';
+            '">' + (c.name || "—") + ' (ID:' + c.id + ')' + (c.id === g.master_id ? ' ← ' + L2.master_label : '') + '</div>';
         });
         html += '<button class="adu-mrg" data-idx="' + idx + '" style="margin-top:8px;padding:5px 14px;font-size:12px;cursor:pointer;background:#1976d2;color:#fff;border:none;border-radius:4px;">' +
-          langs.interface.merge_btn + '</button></div>';
+          L2.merge_btn + '</button></div>';
       });
       html += '<div style="text-align:right;margin-top:12px;padding-top:12px;border-top:1px solid #e0e0e0;">' +
         '<button class="adu-close" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;">' +
-        langs.interface.close_btn + '</button></div></div>';
+        L2.close_btn + '</button></div></div>';
       $("body").append(html);
       $(".adu-close, .adu-overlay").on("click", function () { $(".adu-modal, .adu-overlay").remove(); });
       $(".adu-mrg").on("click", function () {
         var idx = parseInt($(this).data("idx")), $btn = $(this), $grp = $btn.closest("div");
-        $btn.prop("disabled", true).text(langs.interface.scanning);
+        $btn.prop("disabled", true).text(L2.scanning);
         var g = groups[idx], ids = g.ids.filter(function (id) { return id !== g.master_id; });
         mergeContacts(g.master_id, ids).then(function () {
-          $btn.text("✅ " + langs.interface.merge_api_success);
+          $btn.text("✅ " + L2.merge_api_success);
           $grp.fadeOut(300);
-          notify(langs.interface.merge_success, false);
+          notify(L2.merge_success, false);
         }).catch(function (err) {
-          $btn.prop("disabled", false).text(langs.interface.merge_btn);
-          notify(langs.interface.error_occurred + ": " + (err.message || ""), true);
+          $btn.prop("disabled", false).text(L2.merge_btn);
+          notify(L2.error_occurred + ": " + (err.message || ""), true);
         });
       });
     }
